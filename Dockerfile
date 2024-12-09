@@ -2,50 +2,31 @@ FROM ubuntu:22.04
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required packages
-RUN apt-get update && \
-    apt-get install -y software-properties-common wget curl gnupg2 gettext build-essential cmake git && \
-    apt-get install -y libboost-date-time-dev libboost-filesystem-dev libboost-graph-dev libboost-iostreams-dev \
-    libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-serialization-dev \
-    libboost-system-dev libboost-thread-dev libcoin-dev libeigen3-dev libfontconfig1-dev libfreetype6-dev \
-    libgmp-dev libhdf5-dev libmedc-dev libocct-data-exchange-dev libocct-foundation-dev libocct-modeling-algorithms-dev \
-    libocct-visualization-dev libproj-dev libpython3.10-dev libqt5svg5-dev libqt5x11extras5-dev libshiboken2-dev \
-    libspnav-dev libxerces-c-dev libxmu-dev libxmu-headers netgen occt-draw python3.10 python3.10-dev python3.10-distutils \
-    python3.10-venv python3-pivy python3-ply python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qtsvg \
-    python3-pyside2.qtwidgets python3-matplotlib libnglib-dev
+# Install core dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common wget curl gnupg2 build-essential cmake git \
+    libboost-all-dev libeigen3-dev libgmp-dev libhdf5-dev libmedc-dev \
+    libocct-data-exchange-dev libocct-foundation-dev libocct-modeling-algorithms-dev \
+    libocct-visualization-dev libproj-dev libpython3.10-dev python3.10 python3.10-dev \
+    python3.10-venv python3-pivy && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -yqq  libvtk9-dev libvtk9-qt-dev \
-    swig \
-    qtbase5-dev \
-    qtdeclarative5-dev \
-    qt5-qmake \
-    qttools5-dev-tools \
-    qttools5-dev \
-    qtwebengine5-dev \
-    libqt5xmlpatterns5-dev
-
-# Build FreeCAD from source
+# Clone the FreeCAD source
 WORKDIR /tmp
-RUN git clone https://github.com/FreeCAD/FreeCAD.git
-WORKDIR /tmp/FreeCAD
-RUN git checkout 0.21.2
+RUN git clone --branch 0.21.2 --depth 1 https://github.com/FreeCAD/FreeCAD.git
 
-# Create a build directory
-RUN mkdir build
+# Build headless FreeCAD
 WORKDIR /tmp/FreeCAD/build
-
-# Configure the build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_QT5=ON \
-    -DPYTHON_EXECUTABLE=/usr/bin/python3.10 \
-    -DCMAKE_INSTALL_PREFIX=/usr/local
+             -DBUILD_GUI=OFF \
+             -DBUILD_QT5=OFF \
+             -DPYTHON_EXECUTABLE=/usr/bin/python3.10 \
+             -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    make -j$(nproc) && make install
 
-# Build and install FreeCAD
-RUN make -j$(nproc --ignore=1) VERBOSE=1
-RUN make install
-
-# Clean up build dependencies (optional)
-RUN apt-get remove -y build-essential cmake git && apt-get autoremove -y
+# Clean up unnecessary files
+RUN apt-get remove -y build-essential cmake git && apt-get autoremove -y && \
+    rm -rf /tmp/* /var/lib/apt/lists/*
 
 # Set PYTHONPATH for FreeCAD
 ENV PYTHONPATH=/usr/local/Mod
