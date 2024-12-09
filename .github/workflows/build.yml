@@ -28,11 +28,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and Push Multi-Arch Docker Image
-      - name: Build and Push Multi-Arch Docker Image
+      - name: Build and Push for AMD64
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
-          tags: ghcr.io/${{ github.repository }}/my-app:latest
+          tags: ghcr.io/${{ github.repository }}/freecad:amd64
+        
+      - name: Build and Push for ARM64
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository }}/freecad:arm64
+        
+      - name: Merge Multi-Arch Image
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/${{ github.repository }}/freecad:latest \
+            ghcr.io/${{ github.repository }}/freecad:amd64 \
+            ghcr.io/${{ github.repository }}/freecad:arm64
+      

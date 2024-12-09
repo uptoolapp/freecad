@@ -41,7 +41,7 @@ RUN cmake .. -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr/local
 
 # Build and install FreeCAD
-RUN make -j$(nproc)
+RUN make -j$(nproc --ignore=1) VERBOSE=1
 RUN make install
 
 # Clean up build dependencies (optional)
