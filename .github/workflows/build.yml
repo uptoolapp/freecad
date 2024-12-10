@@ -3,7 +3,7 @@ name: Build and Push Multi-Arch Docker Image
 on:
   push:
     branches:
-      - main
+      - "*"
 
 jobs:
   build:
@@ -36,18 +36,18 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/freecad:amd64
         
-      - name: Build and Push for ARM64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/arm64
-          push: true
-          tags: ghcr.io/${{ github.repository }}/freecad:arm64
+      # - name: Build and Push for ARM64
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     platforms: linux/arm64
+      #     push: true
+      #     tags: ghcr.io/${{ github.repository }}/freecad:arm64
         
-      - name: Merge Multi-Arch Image
-        run: |
-          docker buildx imagetools create \
-            --tag ghcr.io/${{ github.repository }}/freecad:latest \
-            ghcr.io/${{ github.repository }}/freecad:amd64 \
-            ghcr.io/${{ github.repository }}/freecad:arm64
+      # - name: Merge Multi-Arch Image
+      #   run: |
+      #     docker buildx imagetools create \
+      #       --tag ghcr.io/${{ github.repository }}/freecad:latest \
+      #       ghcr.io/${{ github.repository }}/freecad:amd64 \
+      #       ghcr.io/${{ github.repository }}/freecad:arm64
       
