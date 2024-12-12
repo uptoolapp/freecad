@@ -7,7 +7,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # use freecad-x64 runner
+    runs-on:
+      group: freecad-x64
 
     steps:
       # Checkout the repository
@@ -28,13 +30,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push for AMD64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: ghcr.io/uptoolapp/freecad:amd64
+      # - name: Build and Push for AMD64
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     platforms: linux/amd64
+      #     push: true
+      #     tags: ghcr.io/uptoolapp/freecad:amd64
         
       - name: Build and Push for ARM64
         uses: docker/build-push-action@v5
