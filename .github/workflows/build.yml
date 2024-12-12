@@ -8,8 +8,7 @@ on:
 jobs:
   build:
     # use freecad-x64 runner
-    runs-on:
-      group: freecad-x64
+    runs-on: freecad-x64
 
     steps:
       # Checkout the repository
