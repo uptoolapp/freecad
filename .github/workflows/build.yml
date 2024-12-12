@@ -6,7 +6,7 @@ on:
       - "*"
 
 jobs:
-  build:
+  build-x64:
     # use freecad-x64 runner
     runs-on: freecad-x64
 
@@ -36,7 +36,29 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/uptoolapp/freecad:amd64
-        
+
+  build-arm64:
+    # use freecad-arm64 runner
+    runs-on: freecad-arm
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+
+      # Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and Push for ARM64
         uses: docker/build-push-action@v5
         with:
@@ -44,7 +66,22 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: ghcr.io/uptoolapp/freecad:arm64
+
+  merge-images:
+    name: Merge Multi-Arch Image
+    needs: [build-x64, build-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
         
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Merge Multi-Arch Image
         run: |
           docker buildx imagetools create \
