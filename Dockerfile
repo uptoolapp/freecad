@@ -15,5 +15,5 @@ RUN git checkout 1.0.0
 
 WORKDIR /freecad-build
 
-RUN cmake -DPYTHON_EXECUTABLE=/usr/bin/python3 -DFREECAD_USE_PYBIND11=ON ../freecad-source
-RUN make -j$(nproc --ignore=2)
+# RUN cmake -DPYTHON_EXECUTABLE=/usr/bin/python3 -DFREECAD_USE_PYBIND11=ON ../freecad-source
+# RUN make -j$(nproc --ignore=2)
