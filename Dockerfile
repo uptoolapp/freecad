@@ -181,12 +181,7 @@ RUN FreeCADCmd --version
 RUN python3 -c "import FreeCAD; print(FreeCAD.newDocument())"
 
 # Required for tests to pass
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y locales
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    dpkg-reconfigure locales && \
-    /usr/sbin/update-locale LANG=en_US.UTF-8
-ENV LANG="en_US.UTF-8"
+ENV LANG="C.UTF-8"
 
 # Run tests (0 means all tests)
 RUN FreeCADCmd --run-test 0
